@@ -10,9 +10,9 @@ import math
 import time
 from collections import OrderedDict
 
-FOLDER_TEST = '../data/sample_similar/'
-FOLDER_TEST = '../data/sample_100k_random/'
-FOLDER_TEST = '/media/malte/Datastorage/mpd/mpd-share/sample3_random/'
+FOLDER_TEST = '../data/sample_50k_similar/'
+# FOLDER_TEST = '../data/sample_100k_random/'
+# FOLDER_TEST = '/media/malte/Datastorage/mpd/mpd-share/sample3_random/'
 
 def evaluate( result, test_folder, strict=False, preloaded=None ):
     
@@ -110,7 +110,7 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
         count += 1
         res_parts['count_'+k] += 1
         
-        if count % 5000 is 0: 
+        if count % 5000 == 0: 
             print( ' -- evaluated {} of {} lists in {}s'.format( count, len(lists), (time.time() - tstart) ) )
        
     print( ' -- evaluated all lists in {}s'.format( (time.time() - tstart) ) ) 
@@ -268,7 +268,7 @@ def __get_unique(original_list):
 
 if __name__ == '__main__':
     
-    results_vknn = pd.read_csv( FOLDER_TEST + 'results_sknn-500-5000.csv' )
+    results_vknn = pd.read_csv( FOLDER_TEST + 'results_sknn.csv' )
 
     res, res_parts = evaluate( results_vknn, FOLDER_TEST, strict=True )
     print(res)

@@ -11,7 +11,7 @@ import json
 from helper import inout
 
 # data folder
-SRC_FOLDER = 'data/original/'
+SRC_FOLDER = '/Users/sophia/Desktop/UMN/Fall 2021/CSCI 5123/Replication Assignment/Data/spotify_million_playlist_dataset/data'
 TARGET_FOLDER = 'data/data_formatted/'
 # where to save the result file
 PLAYLISTS_FILE = TARGET_FOLDER + 'playlists.csv'

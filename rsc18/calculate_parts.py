@@ -15,6 +15,7 @@ from algorithms.knn.sknn import SessionKNN
 from algorithms.knn_disk.knn_disk import KNNDisk
 from algorithms.mf.implicitu import Implicit
 from algorithms.mf.implicitc import ColdImplicit
+from algorithms.mf.svd import My_SVD
 from algorithms.string_matching.implicit_match import ImplicitStringMatch
 from algorithms.string_matching.string_matching import StringMatching
 from helper import inout
@@ -27,7 +28,7 @@ NUM_RECOMMENDATIONS=500
 
 # data folder
 FOLDER_TRAIN = 'data/data_formatted_50k/'
-FOLDER_TEST = 'data/sample_50k_similar/'
+FOLDER_TEST = 'data/sample_50k_similar_2/'
 
 def main():
     
@@ -45,6 +46,8 @@ def main():
 
     algs['smatch'] = Fill( StringMatching(), mp )
     algs['imatch'] = Fill( ImplicitStringMatch( 128, add_artists=True ), mp )
+
+    algs['svd'] = Fill(My_SVD(), mp)
     
     #start processing
     
@@ -135,8 +138,8 @@ def eval(list):
         print( all )
         print( all_parts )
     
-        all.to_csv( FOLDER_TEST + 'eval.csv' )
-        all_parts.to_csv( FOLDER_TEST + 'eval_parts.csv' )
+        all.to_csv( FOLDER_TEST + 'individual_mathods_with_reduce_changce_eval.csv' )
+        all_parts.to_csv( FOLDER_TEST + 'individual_mathods_with_reduce_change_eval_parts.csv' )
     
 if __name__ == '__main__':
     main()

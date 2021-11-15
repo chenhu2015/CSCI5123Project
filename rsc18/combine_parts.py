@@ -44,9 +44,11 @@ def main():
     
     smatch = Solution( FOLDER_TEST + 'results_smatch.csv' )
     imatch = Solution( FOLDER_TEST + 'results_imatch.csv' )
+
+    svd = Solution(FOLDER_TEST + 'results_svd.csv')
     
     titlerec = Weighted( [smatch,imatch], [0.5,0.5] ) #best one for title only
-    hybrid = Weighted( [diskknn,iknn,sknn,implicit], [0.4,0.3,0.2,0.1] ) #best one for lists with 5+ seed tracks
+    hybrid = Weighted( [svd, diskknn,iknn,sknn,implicit], [0.2, 0.2,0.3,0.2,0.1] ) #best one for lists with 5+ seed tracks
     firstcat = Weighted( [hybrid,titlerec], [0.7,0.3] ) #best one for lists with only one seed track
     
     algs['recommender'] = Switch( [titlerec,firstcat,hybrid], [1,5,101] ) #main
