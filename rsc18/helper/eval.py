@@ -9,6 +9,8 @@ import pandas as pd
 import math
 import time
 from collections import OrderedDict
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 FOLDER_TEST = '../data/sample_50k_similar/'
 # FOLDER_TEST = '../data/sample_100k_random/'
@@ -37,6 +39,8 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
     res['rp'] = [0]
     res['pages'] = [0]
     res['ndcg'] = [0]
+    res['recall'] = [0]
+    res['f1'] = [0]
     
     res_parts = pd.DataFrame()
     
@@ -92,21 +96,29 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
             res_parts['rp_'+k] = [0]
             res_parts['page_'+k] = [0]
             res_parts['ndcg_'+k] = [0]
+            res_parts['recall_'+k] = [0]
+            res_parts['f1_'+k] = [0]
             res_parts['count_'+k] = [0]
             res_parts['samples_'+k] = [plist.num_samples]
             
         r_prec = r_precision( recs, tracks )
         pages = rec_page( recs, tracks )
         ndcga = ndcg( recs, tracks )
+        recalla = r_recall( recs, tracks )
+        f1a = r_f1( recs, tracks )
         
         res['rp'] += r_prec
         res['pages'] += pages
         res['ndcg'] += ndcga
+        res['recall'] += recalla
+        res['f1'] += f1a
         
         res_parts['rp_'+k] += r_prec
         res_parts['page_'+k] += pages
         res_parts['ndcg_'+k] += ndcga
-        
+        res_parts['recall_'+k] += recalla
+        res_parts['f1_'+k] += f1a
+
         count += 1
         res_parts['count_'+k] += 1
         
@@ -120,10 +132,26 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
         res_parts['rp_'+k] = res_parts['rp_'+k] / res_parts['count_'+k] 
         res_parts['page_'+k] = res_parts['page_'+k] / res_parts['count_'+k] 
         res_parts['ndcg_'+k]  = res_parts['ndcg_'+k] / res_parts['count_'+k]
+        res_parts['recall_'+k] = res_parts['recall_'+k] / res_parts['count_'+k]
+        res_parts['f1_'+k] = res_parts['f1_'+k] / res_parts['count_'+k]
     
     return res, res_parts
-        
-def r_precision( rec, actual ):    
+
+def r_recall( rec, actual ):
+    # Recall Score = TP / (FN + TP)
+    actual = np.unique( actual )
+    rec = rec[:len(actual)]
+    recall = recall_score(actual, rec, average="micro")    
+    return recall
+
+def r_f1( rec, actual ):
+    actual = np.unique( actual )
+    rec = rec[:len(actual)]
+    f1 = f1_score(actual, rec, average="micro")
+    return f1
+
+def r_precision( rec, actual ):
+    # Precision Score = TP / (FP + TP)  
     actual = np.unique( actual )
     mask = np.in1d( rec[:len(actual)], actual )
     res = ( mask.sum() / len(actual) )

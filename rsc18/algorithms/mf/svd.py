@@ -8,12 +8,13 @@ from surprise import Reader
 from surprise.model_selection import KFold
 
 class My_SVD:
-    def __init__(self, n_factors = 100, n_epochs = 10, lr = 0.01, session_key = 'playlist_id', item_key = 'track_id'):
+    def __init__(self, n_factors = 100, n_epochs = 10, lr = 0.01, session_key = 'playlist_id', item_key = 'track_id', artist_key = 'artist_id'):
         self.factors = n_factors
         self.epochs = n_epochs
         self.lr = lr
         self.session_key = session_key
         self.item_key = item_key
+        self.artist_key = artist_key
 
     def train(self, train, test=None):
         data = train['actions']
@@ -25,19 +26,23 @@ class My_SVD:
         sessionids = data[self.session_key].unique()
         self.n_sessions = len(sessionids)
         self.useridmap = pd.Series(data=np.arange(self.n_sessions), index=sessionids)
-
+        
+        artistids = data[self.artist_key].unique()
+        self.n_artists = len(artistids)
+        self.ratingidmap = pd.Series(data=np.arange(self.n_artists), index=artistids)
+        
         tstart = time.time()
         
         data = pd.merge(data, pd.DataFrame({self.item_key:self.itemidmap.index, 'ItemIdx':self.itemidmap[self.itemidmap.index].values}), on=self.item_key, how='inner')
         data = pd.merge(data, pd.DataFrame({self.session_key:self.useridmap.index, 'SessionIdx':self.useridmap[self.useridmap.index].values}), on=self.session_key, how='inner')
+        data['Rating'] = 1
 
         print( 'add index in {}'.format( (time.time() - tstart) ) )
-
         self.model = SVD(n_factors=self.factors, n_epochs=self.epochs, lr_all=self.lr)
 
-        reader = Reader(rating_scale=(data['artist_id'].min(), data['artist_id'].max()))
-
-        dataset = Dataset.load_from_df(data[['SessionIdx', 'ItemIdx', 'artist_id']], reader)
+        reader = Reader(rating_scale=(0, 1))
+        dataset = Dataset.load_from_df(data[['SessionIdx', 'ItemIdx', 'Rating']], reader)
+        dataset.split(n_folds=5)
 
         trainset = dataset.build_full_trainset()
 
@@ -56,16 +61,11 @@ class My_SVD:
         itemidxs = self.itemidmap[items]
         # Haven't considered idf here, could use as future improvement
         uF = self.model.qi[itemidxs].mean(axis=0).copy()
-        print(self.model.qi.size, uF.size)
-        print('*' * 50 + "svd" + '*' * 50)
         conf = np.dot( self.model.qi, uF )
         res_dict = {}
         res_dict['track_id'] =  self.itemidmap.index
         res_dict['confidence'] = conf
 
-        print(len(self.itemidmap.index))
-        print(len(conf))
-        print('*' * 50 + "svd" + '*' * 50)
         res = pd.DataFrame.from_dict(res_dict)
         res = res[ ~np.in1d( res.track_id, tracks ) ]
         res.sort_values( 'confidence', ascending=False, inplace=True )

@@ -138,8 +138,8 @@ def eval(list):
         print( all )
         print( all_parts )
     
-        all.to_csv( FOLDER_TEST + 'individual_mathods_with_reduce_changce_eval.csv' )
-        all_parts.to_csv( FOLDER_TEST + 'individual_mathods_with_reduce_change_eval_parts.csv' )
+        all.to_csv( FOLDER_TEST + 'svd_eval.csv' )
+        all_parts.to_csv( FOLDER_TEST + 'svd_eval_parts.csv' )
     
 if __name__ == '__main__':
     main()
