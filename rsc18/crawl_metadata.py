@@ -16,7 +16,7 @@ import json
 import math
 from helper import inout
 
-FOLDER_IN = 'data/original/'
+FOLDER_IN = '/Users/sophia/Desktop/UMN/Fall 2021/CSCI 5123/Replication Assignment/Data/spotify_million_playlist_dataset/data'
 FOLDER_OUT = 'data/metadata_combined/'
 
 USER = ''

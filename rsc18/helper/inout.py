@@ -77,7 +77,7 @@ def load_actions( folder, feather=False ):
         return actions
     
     actions = pd.read_csv( folder + PLAYLISTS_TRACKS_FILE )
-    return actions
+    return actions.reset_index()
 
 def load_actions_hdf5( folder ):
     store = pd.HDFStore( folder + 'store.hdf5' )
@@ -91,9 +91,9 @@ def load_meta( folder, feather=False ):
         tracks = pd.read_feather( folder + TRACKS_FILE + '.fthr' )
         return playlists, artists, tracks
     
-    playlists = pd.read_csv( folder + PLAYLISTS_FILE )
-    artists = pd.read_csv( folder + ARTISTS_FILE )
-    tracks = pd.read_csv( folder + TRACKS_FILE )
+    playlists = pd.read_csv( folder + PLAYLISTS_FILE ).reset_index()
+    artists = pd.read_csv( folder + ARTISTS_FILE ).reset_index()
+    tracks = pd.read_csv( folder + TRACKS_FILE ).reset_index()
     return playlists, artists, tracks
 
 def load_meta_hdf5( folder ):

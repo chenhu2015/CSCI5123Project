@@ -10,8 +10,8 @@ from helper import inout as IO , inout
 import os
 
 # data folder
-SRC_FOLDER = 'data/online/'
-TARGET_FOLDER = 'data/online/'
+SRC_FOLDER = '/Users/sophia/Desktop/UMN/Fall 2021/CSCI 5123/Replication Assignment/Data/spotify_million_playlist_dataset_challenge/'
+TARGET_FOLDER = '/Users/sophia/Desktop/UMN/Fall 2021/CSCI 5123/Replication Assignment/Data/spotify_million_playlist_dataset_challenge/'
 
 FOLDER_DATA = 'data/data_formatted/'
 
