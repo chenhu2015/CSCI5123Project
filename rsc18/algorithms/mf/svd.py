@@ -42,7 +42,6 @@ class My_SVD:
 
         reader = Reader(rating_scale=(0, 1))
         dataset = Dataset.load_from_df(data[['SessionIdx', 'ItemIdx', 'Rating']], reader)
-        dataset.split(n_folds=5)
 
         trainset = dataset.build_full_trainset()
 
