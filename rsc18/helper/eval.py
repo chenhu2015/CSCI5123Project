@@ -146,7 +146,7 @@ def r_recall( rec, actual ):
     rec = rec[:len(actual)]
     masked_actual = np.ones(actual.shape)
     masked_rec = np.in1d( rec[:len(actual)], actual ).astype(int)
-    recall = recall_score(masked_actual, masked_rec, average="micro")    
+    recall = recall_score(masked_actual, masked_rec, average="binary")
     return recall
 
 def r_f1( rec, actual ):
@@ -154,7 +154,7 @@ def r_f1( rec, actual ):
     rec = rec[:len(actual)]
     masked_actual = np.ones(actual.shape)
     masked_rec = np.in1d( rec[:len(actual)], actual ).astype(int)
-    f1 = f1_score(masked_actual, masked_rec, average="micro")
+    f1 = f1_score(masked_actual, masked_rec, average="binary")
     return f1
 
 def r_rmse( rec, actual ):
