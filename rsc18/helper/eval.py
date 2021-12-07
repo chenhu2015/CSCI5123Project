@@ -9,10 +9,13 @@ import pandas as pd
 import math
 import time
 from collections import OrderedDict
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import mean_squared_error
 
-FOLDER_TEST = '../data/sample_similar/'
-FOLDER_TEST = '../data/sample_100k_random/'
-FOLDER_TEST = '/media/malte/Datastorage/mpd/mpd-share/sample3_random/'
+FOLDER_TEST = '../data/sample_50k_similar/'
+# FOLDER_TEST = '../data/sample_100k_random/'
+# FOLDER_TEST = '/media/malte/Datastorage/mpd/mpd-share/sample3_random/'
 
 def evaluate( result, test_folder, strict=False, preloaded=None ):
     
@@ -37,6 +40,9 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
     res['rp'] = [0]
     res['pages'] = [0]
     res['ndcg'] = [0]
+    res['recall'] = [0]
+    res['f1'] = [0]
+    res['rmse'] = [0]
     
     res_parts = pd.DataFrame()
     
@@ -68,10 +74,6 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
         
         true_idx = true_map[pid]
         result_idx = result_map[pid]
-        
-        
-            
-        
         recs = result_tracks[ result_start[result_idx] : result_start[result_idx + 1] ]
         tracks = true_tracks[ true_start[true_idx] : true_start[true_idx + 1] ]
                 
@@ -92,25 +94,37 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
             res_parts['rp_'+k] = [0]
             res_parts['page_'+k] = [0]
             res_parts['ndcg_'+k] = [0]
+            res_parts['recall_'+k] = [0]
+            res_parts['f1_'+k] = [0]
+            res_parts['rmse_'+k] = [0]
             res_parts['count_'+k] = [0]
             res_parts['samples_'+k] = [plist.num_samples]
             
         r_prec = r_precision( recs, tracks )
         pages = rec_page( recs, tracks )
         ndcga = ndcg( recs, tracks )
+        recalla = r_recall( recs, tracks )
+        f1a = r_f1( recs, tracks )
+        rmsea = r_rmse( recs, tracks )
         
         res['rp'] += r_prec
         res['pages'] += pages
         res['ndcg'] += ndcga
+        res['recall'] += recalla
+        res['f1'] += f1a
+        res['rmse'] += rmsea
         
         res_parts['rp_'+k] += r_prec
         res_parts['page_'+k] += pages
         res_parts['ndcg_'+k] += ndcga
-        
+        res_parts['recall_'+k] += recalla
+        res_parts['f1_'+k] += f1a
+        res_parts['rmse_'+k] += rmsea
+
         count += 1
         res_parts['count_'+k] += 1
         
-        if count % 5000 is 0: 
+        if count % 5000 == 0: 
             print( ' -- evaluated {} of {} lists in {}s'.format( count, len(lists), (time.time() - tstart) ) )
        
     print( ' -- evaluated all lists in {}s'.format( (time.time() - tstart) ) ) 
@@ -120,10 +134,39 @@ def evaluate( result, test_folder, strict=False, preloaded=None ):
         res_parts['rp_'+k] = res_parts['rp_'+k] / res_parts['count_'+k] 
         res_parts['page_'+k] = res_parts['page_'+k] / res_parts['count_'+k] 
         res_parts['ndcg_'+k]  = res_parts['ndcg_'+k] / res_parts['count_'+k]
+        res_parts['recall_'+k] = res_parts['recall_'+k] / res_parts['count_'+k]
+        res_parts['f1_'+k] = res_parts['f1_'+k] / res_parts['count_'+k]
+        res_parts['rmse'+k] = res_parts['rmse_'+k] / res_parts['count_'+k]
     
     return res, res_parts
-        
-def r_precision( rec, actual ):    
+
+def r_recall( rec, actual ):
+    # Recall Score = TP / (FN + TP)
+    actual = np.unique( actual )
+    rec = rec[:len(actual)]
+    masked_actual = np.ones(actual.shape)
+    masked_rec = np.in1d( rec[:len(actual)], actual ).astype(int)
+    recall = recall_score(masked_actual, masked_rec, average="binary")
+    return recall
+
+def r_f1( rec, actual ):
+    actual = np.unique( actual )
+    rec = rec[:len(actual)]
+    masked_actual = np.ones(actual.shape)
+    masked_rec = np.in1d( rec[:len(actual)], actual ).astype(int)
+    f1 = f1_score(masked_actual, masked_rec, average="binary")
+    return f1
+
+def r_rmse( rec, actual ):
+    actual = np.unique( actual )
+    rec = rec[:len(actual)]
+    masked_actual = np.ones(actual.shape)
+    masked_rec = np.in1d( rec[:len(actual)], actual ).astype(int)
+    rmse = mean_squared_error(masked_actual, masked_rec, squared=False)
+    return rmse
+
+def r_precision( rec, actual ):
+    # Precision Score = TP / (FP + TP)  
     actual = np.unique( actual )
     mask = np.in1d( rec[:len(actual)], actual )
     res = ( mask.sum() / len(actual) )
@@ -268,7 +311,7 @@ def __get_unique(original_list):
 
 if __name__ == '__main__':
     
-    results_vknn = pd.read_csv( FOLDER_TEST + 'results_sknn-500-5000.csv' )
+    results_vknn = pd.read_csv( FOLDER_TEST + 'results_sknn.csv' )
 
     res, res_parts = evaluate( results_vknn, FOLDER_TEST, strict=True )
     print(res)
