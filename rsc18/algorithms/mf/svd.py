@@ -6,6 +6,7 @@ from surprise import SVD
 from surprise import Dataset
 from surprise import Reader
 from surprise.model_selection import KFold
+from collections import defaultdict
 
 class My_SVD:
     def __init__(self, n_factors = 100, n_epochs = 10, lr = 0.01, session_key = 'playlist_id', item_key = 'track_id', artist_key = 'artist_id'):
@@ -58,16 +59,22 @@ class My_SVD:
             return pd.DataFrame.from_dict(res_dict)
         
         itemidxs = self.itemidmap[items]
-        # Haven't considered idf here, could use as future improvement
-        uF = self.model.qi[itemidxs].mean(axis=0).copy()
-        conf = np.dot( self.model.qi, uF )
-        res_dict = {}
-        res_dict['track_id'] =  self.itemidmap.index
-        res_dict['confidence'] = conf
-
+        if playlist_id is not None:
+            res_dict = defaultdict(list)
+            for iid in items:
+                est = self.model.predict(playlist_id, iid).est
+                res_dict['track_id'].append(iid)
+                res_dict['confidence'].append(est)
+        else:
+            # Haven't considered idf here, could use as future improvement
+            uF = self.model.qi[itemidxs].mean(axis=0).copy()
+            conf = np.dot( self.model.qi, uF )
+            res_dict = {}
+            res_dict['track_id'] =  self.itemidmap.index
+            res_dict['confidence'] = conf
+            
         res = pd.DataFrame.from_dict(res_dict)
         res = res[ ~np.in1d( res.track_id, tracks ) ]
         res.sort_values( 'confidence', ascending=False, inplace=True )
-
         return res.head(500)
         
