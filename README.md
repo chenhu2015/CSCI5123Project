@@ -1,5 +1,4 @@
-# rsc18
-Publication of the code we used in the RecSys Challenge 2018.
+Code we used from the RecSys Challenge 2018 and with modification.
 
 ## Requirements
 * The code was tested with miniconda3 (python3.6.5)
